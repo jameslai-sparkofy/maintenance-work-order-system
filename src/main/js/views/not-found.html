@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>頁面不存在 - 維修工單管理系統</title>
+    <link rel="stylesheet" href="/static/css/main.css">
+</head>
+<body>
+    <div class="container">
+        <header class="signature-header">
+            <h1>🔧 維修工單管理系統</h1>
+        </header>
+
+        <main class="main-content">
+            <div class="error-state">
+                <div class="error-icon">🔍</div>
+                <h2>找不到頁面</h2>
+                <p>您要查看的頁面不存在或連結已失效</p>
+                <div style="margin-top: 2rem;">
+                    <a href="/maintenance/new" class="btn btn-primary">
+                        🏠 返回首頁
+                    </a>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <style>
+        .error-state {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+        
+        .error-icon {
+            font-size: 5rem;
+            margin-bottom: 2rem;
+            opacity: 0.5;
+        }
+        
+        .error-state h2 {
+            color: #6c757d;
+            margin-bottom: 1rem;
+            font-size: 2rem;
+        }
+        
+        .error-state p {
+            color: #adb5bd;
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .signature-header {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .signature-header h1 {
+            font-size: 2rem;
+            margin: 0;
+        }
+    </style>
+</body>
+</html>

@@ -260,4 +260,64 @@ router.post('/workers', async (req, res) => {
     }
 });
 
+// Update worker
+router.put('/workers/:id', async (req, res) => {
+    try {
+        const workerModel = new Worker();
+        const updated = await workerModel.update(req.params.id, {
+            name: req.body.name,
+            phone: req.body.phone,
+            email: req.body.email
+        });
+        
+        if (updated) {
+            res.json({
+                success: true,
+                message: 'Worker updated successfully'
+            });
+        } else {
+            res.status(404).json({
+                success: false,
+                error: 'Worker not found'
+            });
+        }
+        
+    } catch (error) {
+        console.error('Error updating worker:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to update worker',
+            message: error.message
+        });
+    }
+});
+
+// Delete worker
+router.delete('/workers/:id', async (req, res) => {
+    try {
+        const workerModel = new Worker();
+        const deleted = await workerModel.delete(req.params.id);
+        
+        if (deleted) {
+            res.json({
+                success: true,
+                message: 'Worker deleted successfully'
+            });
+        } else {
+            res.status(404).json({
+                success: false,
+                error: 'Worker not found'
+            });
+        }
+        
+    } catch (error) {
+        console.error('Error deleting worker:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to delete worker',
+            message: error.message
+        });
+    }
+});
+
 module.exports = router;

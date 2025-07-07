@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>維修單已確認 - 維修工單管理系統</title>
+    <link rel="stylesheet" href="/static/css/main.css">
+    <link rel="stylesheet" href="/static/css/signature.css">
+</head>
+<body>
+    <div class="container">
+        <header class="signature-header">
+            <h1>✅ 維修單已確認</h1>
+            <p>此維修單已完成確認程序</p>
+        </header>
+
+        <main class="main-content">
+            <div id="loadingState" class="loading-state">
+                <div class="loading-spinner"></div>
+                <p>載入維修單資料中...</p>
+            </div>
+
+            <div id="workOrderContent" class="work-order-content" style="display: none;">
+                <!-- Work Order Details -->
+                <div class="work-order-card">
+                    <div class="card-header">
+                        <h2>📋 維修單詳細資料</h2>
+                        <div class="work-order-number" id="workOrderNumber"></div>
+                    </div>
+                    
+                    <div class="card-body">
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <label>日期</label>
+                                <span id="workOrderDate"></span>
+                            </div>
+                            
+                            <div class="info-item" id="siteContainer" style="display: none;">
+                                <label>案場</label>
+                                <span id="siteName"></span>
+                            </div>
+                            
+                            <div class="info-item" id="locationContainer" style="display: none;">
+                                <label>位置</label>
+                                <span id="location"></span>
+                            </div>
+                            
+                            <div class="info-item" id="reasonContainer" style="display: none;">
+                                <label>維修原因</label>
+                                <span id="reason"></span>
+                            </div>
+                            
+                            <div class="info-item" id="workerContainer" style="display: none;">
+                                <label>工務人員</label>
+                                <span id="workerName"></span>
+                            </div>
+                            
+                            <div class="info-item" id="amountContainer" style="display: none;">
+                                <label>金額</label>
+                                <span id="amount"></span>
+                            </div>
+                            
+                            <div class="info-item">
+                                <label>狀態</label>
+                                <span class="status-badge status-confirmed">
+                                    ✅ 已確認
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <!-- Photos Section -->
+                        <div id="photosSection" class="photos-section" style="display: none;">
+                            <h3>📷 相關照片</h3>
+                            <div id="photosGrid" class="photos-grid"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Signature Confirmation -->
+                <div class="signature-card">
+                    <div class="card-header">
+                        <h2>✍️ 確認簽名</h2>
+                        <p>此維修單已完成數位簽名確認</p>
+                    </div>
+                    
+                    <div class="card-body">
+                        <div class="signature-display">
+                            <img id="signatureImage" class="signature-image" alt="Digital Signature">
+                            <div class="signature-info">
+                                <p><strong>簽名人員:</strong> <span id="signerName">-</span></p>
+                                <p><strong>確認時間:</strong> <span id="signedTime">-</span></p>
+                                <p id="signerEmailInfo" style="display: none;">
+                                    <strong>電子郵件:</strong> <span id="signerEmail">-</span>
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="confirmation-message">
+                            <div class="success-icon">✅</div>
+                            <h3>確認完成</h3>
+                            <p>此維修單已完成確認程序，感謝您的配合</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error State -->
+            <div id="errorState" class="error-state" style="display: none;">
+                <div class="error-icon">❌</div>
+                <h2>維修單不存在</h2>
+                <p>您要查看的維修單不存在或連結已失效</p>
+                <button class="btn btn-primary" onclick="window.close()">關閉視窗</button>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Get unique link from URL path
+        const pathParts = window.location.pathname.split('/');
+        const uniqueLink = pathParts[pathParts.length - 1];
+        
+        // Load work order data
+        loadWorkOrderData(uniqueLink);
+        
+        async function loadWorkOrderData(uniqueLink) {
+            try {
+                const response = await fetch(`/api/work-order-data/${uniqueLink}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayWorkOrderData(data.data);
+                    hideLoadingState();
+                } else {
+                    showErrorState();
+                }
+                
+            } catch (error) {
+                console.error('Error loading work order:', error);
+                showErrorState();
+            }
+        }
+        
+        function displayWorkOrderData(workOrder) {
+            // Display work order number
+            document.getElementById('workOrderNumber').textContent = workOrder.work_order_number;
+            
+            // Display date
+            document.getElementById('workOrderDate').textContent = new Date(workOrder.date).toLocaleDateString('zh-TW');
+            
+            // Display optional fields
+            if (workOrder.site_name) {
+                document.getElementById('siteName').textContent = workOrder.site_name;
+                document.getElementById('siteContainer').style.display = 'block';
+            }
+            
+            const locationParts = [workOrder.building, workOrder.floor, workOrder.unit].filter(Boolean);
+            if (locationParts.length > 0) {
+                document.getElementById('location').textContent = locationParts.join(' / ');
+                document.getElementById('locationContainer').style.display = 'block';
+            }
+            
+            if (workOrder.reason) {
+                document.getElementById('reason').textContent = workOrder.reason;
+                document.getElementById('reasonContainer').style.display = 'block';
+            }
+            
+            if (workOrder.worker_name) {
+                document.getElementById('workerName').textContent = workOrder.worker_name;
+                document.getElementById('workerContainer').style.display = 'block';
+            }
+            
+            if (workOrder.amount > 0) {
+                document.getElementById('amount').textContent = `NT$ ${workOrder.amount.toLocaleString()}`;
+                document.getElementById('amountContainer').style.display = 'block';
+            }
+            
+            // Display photos if available
+            if (workOrder.photos && workOrder.photos.length > 0) {
+                displayPhotos(workOrder.photos);
+            }
+            
+            // Display signature
+            if (workOrder.signature) {
+                displaySignature(workOrder.signature);
+            }
+        }
+        
+        function displayPhotos(photos) {
+            const photosSection = document.getElementById('photosSection');
+            const photosGrid = document.getElementById('photosGrid');
+            
+            photosSection.style.display = 'block';
+            photosGrid.innerHTML = '';
+            
+            photos.forEach(photo => {
+                const img = document.createElement('img');
+                img.src = `/uploads/${photo.photo_path}`;
+                img.alt = photo.original_name || 'Work order photo';
+                img.className = 'photo-thumbnail';
+                img.loading = 'lazy';
+                
+                img.addEventListener('click', () => {
+                    openPhotoModal(img.src, photo.original_name);
+                });
+                
+                photosGrid.appendChild(img);
+            });
+        }
+        
+        function displaySignature(signature) {
+            document.getElementById('signatureImage').src = signature.signature_data;
+            document.getElementById('signerName').textContent = signature.signer_name || '未提供';
+            document.getElementById('signedTime').textContent = new Date(signature.signed_at).toLocaleString('zh-TW');
+            
+            if (signature.signer_email) {
+                document.getElementById('signerEmail').textContent = signature.signer_email;
+                document.getElementById('signerEmailInfo').style.display = 'block';
+            }
+        }
+        
+        function openPhotoModal(src, name) {
+            const modal = document.createElement('div');
+            modal.className = 'modal show';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 90%; max-height: 90%;">
+                    <h3>${name || 'Photo'}</h3>
+                    <img src="${src}" style="max-width: 100%; max-height: 70vh; object-fit: contain;">
+                    <div class="modal-actions">
+                        <button class="btn btn-secondary" onclick="this.closest('.modal').remove()">關閉</button>
+                    </div>
+                </div>
+            `;
+            
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.remove();
+                }
+            });
+            
+            document.body.appendChild(modal);
+        }
+        
+        function hideLoadingState() {
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('workOrderContent').style.display = 'block';
+        }
+        
+        function showErrorState() {
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('errorState').style.display = 'block';
+        }
+    </script>
+    
+    <style>
+        .confirmation-message {
+            text-align: center;
+            padding: 2rem;
+            margin-top: 2rem;
+            border-top: 1px solid #dee2e6;
+        }
+        
+        .success-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .confirmation-message h3 {
+            color: #28a745;
+            margin-bottom: 1rem;
+        }
+        
+        .confirmation-message p {
+            color: #6c757d;
+            font-size: 1.1rem;
+        }
+        
+        .photo-thumbnail {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .photo-thumbnail:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+    </style>
+</body>
+</html>
