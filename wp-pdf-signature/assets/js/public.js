@@ -191,7 +191,15 @@
         $('#clear-signature').on('click', function() {
             signaturePad.clear();
             $(this).blur();
+            updateSubmitButton(); // 清除後更新按鈕狀態
         });
+        
+        // 監聽簽名變化
+        if (signaturePad.addEventListener) {
+            signaturePad.addEventListener('endStroke', function() {
+                updateSubmitButton();
+            });
+        }
         
         // 視窗大小改變時調整畫布
         $(window).on('resize', debounce(resizeSignaturePad, 250));
@@ -549,11 +557,20 @@
         };
     }
     
-    // 監聽簽名板變化以更新提交按鈕
-    if (typeof SignaturePad !== 'undefined') {
-        $(document).on('signature-pad-changed', function() {
-            updateSubmitButton();
-        });
+    // 監聽簽名板變化以更新提交按鈕 - 使用MutationObserver替代DOMNodeInserted
+    if (typeof SignaturePad !== 'undefined' && typeof MutationObserver !== 'undefined') {
+        const signatureCanvas = document.getElementById('signature-pad');
+        if (signatureCanvas) {
+            const observer = new MutationObserver(function(mutations) {
+                updateSubmitButton();
+            });
+            
+            observer.observe(signatureCanvas, {
+                attributes: true,
+                childList: true,
+                subtree: true
+            });
+        }
     }
     
     // 鍵盤快捷鍵

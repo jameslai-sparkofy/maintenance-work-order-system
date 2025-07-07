@@ -371,8 +371,9 @@ jQuery(document).ready(function($) {
         $('#update-field').on('click', updateFieldProperties);
         $('#delete-field').on('click', deleteField);
         
-        // 即時更新
+        // 即時更新 - 使用現代事件監聽
         $('#field-name, #field-type, #field-x, #field-y, #field-width, #field-height, #field-required, #field-order')
+            .off('input change')
             .on('input change', updateFieldProperties);
     }
     
