@@ -320,4 +320,56 @@ router.delete('/workers/:id', async (req, res) => {
     }
 });
 
+// Delete work order
+router.delete('/:id', async (req, res) => {
+    try {
+        const workOrderModel = new WorkOrder();
+        
+        // Check if work order exists
+        const workOrder = await workOrderModel.getById(req.params.id);
+        if (!workOrder) {
+            return res.status(404).json({
+                success: false,
+                error: 'Work order not found'
+            });
+        }
+        
+        // Delete associated photos
+        if (workOrder.photos && workOrder.photos.length > 0) {
+            for (const photo of workOrder.photos) {
+                try {
+                    const photoPath = path.join(__dirname, '../../../../output/uploads', photo.photo_path);
+                    await fs.unlink(photoPath);
+                } catch (photoError) {
+                    console.error('Error deleting photo file:', photoError);
+                    // Continue even if photo deletion fails
+                }
+            }
+        }
+        
+        // Delete work order
+        const deleted = await workOrderModel.delete(req.params.id);
+        
+        if (deleted) {
+            res.json({
+                success: true,
+                message: 'Work order deleted successfully'
+            });
+        } else {
+            res.status(404).json({
+                success: false,
+                error: 'Work order not found'
+            });
+        }
+        
+    } catch (error) {
+        console.error('Error deleting work order:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to delete work order',
+            message: error.message
+        });
+    }
+});
+
 module.exports = router;

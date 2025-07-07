@@ -139,6 +139,9 @@ function createWorkOrderRow(workOrder) {
                 <button class="action-btn btn-share" onclick="window.shareWorkOrder('${workOrder.unique_link}')" title="分享連結">
                     🔗 分享
                 </button>
+                <button class="action-btn btn-delete" onclick="window.deleteWorkOrder(${workOrder.id}, '${workOrder.work_order_number}')" title="刪除工單">
+                    🗑️ 刪除
+                </button>
             </div>
         </td>
     `;
@@ -517,7 +520,34 @@ function showEmptyState() {
     if (emptyState) emptyState.style.display = 'block';
 }
 
+// Delete work order function
+function deleteWorkOrder(workOrderId, workOrderNumber) {
+    if (confirm(`確定要刪除工單 ${workOrderNumber} 嗎？此操作無法復原。`)) {
+        performDeleteWorkOrder(workOrderId);
+    }
+}
+
+async function performDeleteWorkOrder(workOrderId) {
+    try {
+        const response = await API.request(`/api/work-orders/${workOrderId}`, {
+            method: 'DELETE'
+        });
+        
+        if (response.success) {
+            UI.showAlert('工單刪除成功', 'success');
+            await loadWorkOrders(); // Reload the list
+        } else {
+            throw new Error(response.error || '刪除工單失敗');
+        }
+        
+    } catch (error) {
+        console.error('Error deleting work order:', error);
+        UI.showAlert(error.message || '刪除工單失敗，請稍後再試', 'error');
+    }
+}
+
 // Global functions for HTML onclick handlers
 window.viewWorkOrder = viewWorkOrder;
 window.shareWorkOrder = shareWorkOrder;
 window.openPhotoModal = openPhotoModal;
+window.deleteWorkOrder = deleteWorkOrder;

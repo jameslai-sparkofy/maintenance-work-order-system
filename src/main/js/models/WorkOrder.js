@@ -287,6 +287,28 @@ class WorkOrder {
             throw error;
         }
     }
+
+    async delete(workOrderId) {
+        try {
+            await this.db.init();
+            
+            // Delete in correct order due to foreign key constraints
+            
+            // Delete signatures first
+            await this.db.run('DELETE FROM signatures WHERE work_order_id = ?', [workOrderId]);
+            
+            // Delete photos
+            await this.db.run('DELETE FROM photos WHERE work_order_id = ?', [workOrderId]);
+            
+            // Delete work order
+            const result = await this.db.run('DELETE FROM work_orders WHERE id = ?', [workOrderId]);
+            
+            return result.changes > 0;
+        } catch (error) {
+            console.error('Error deleting work order:', error);
+            throw error;
+        }
+    }
 }
 
 module.exports = WorkOrder;
