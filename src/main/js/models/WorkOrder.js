@@ -298,7 +298,7 @@ class WorkOrder {
             await this.db.run('DELETE FROM signatures WHERE work_order_id = ?', [workOrderId]);
             
             // Delete photos
-            await this.db.run('DELETE FROM photos WHERE work_order_id = ?', [workOrderId]);
+            await this.db.run('DELETE FROM work_order_photos WHERE work_order_id = ?', [workOrderId]);
             
             // Delete work order
             const result = await this.db.run('DELETE FROM work_orders WHERE id = ?', [workOrderId]);
