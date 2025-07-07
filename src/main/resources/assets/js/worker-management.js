@@ -127,6 +127,9 @@ function displayWorkers() {
         const workerCard = createWorkerCard(worker);
         workersList.appendChild(workerCard);
     });
+    
+    // Add event listeners for worker action buttons
+    attachWorkerActionListeners();
 }
 
 function createWorkerCard(worker) {
@@ -166,10 +169,10 @@ function createWorkerCard(worker) {
         </div>
         
         <div class="worker-actions">
-            <button class="worker-action-btn btn-edit-worker" onclick="window.editWorker(${worker.id})">
+            <button class="worker-action-btn btn-edit-worker" data-id="${worker.id}">
                 ✏️ 編輯
             </button>
-            <button class="worker-action-btn btn-delete-worker" onclick="window.deleteWorker(${worker.id}, '${worker.name.replace(/'/g, "\\'")}')">
+            <button class="worker-action-btn btn-delete-worker" data-id="${worker.id}" data-name="${worker.name}">
                 🗑️ 刪除
             </button>
         </div>
@@ -486,7 +489,27 @@ function cancelWorkerForm() {
     hideWorkerForm();
 }
 
-// Global functions for HTML onclick handlers
+// Attach event listeners to worker action buttons
+function attachWorkerActionListeners() {
+    // Edit buttons
+    document.querySelectorAll('.btn-edit-worker').forEach(button => {
+        button.addEventListener('click', (e) => {
+            const id = parseInt(e.target.closest('button').dataset.id);
+            editWorker(id);
+        });
+    });
+    
+    // Delete buttons
+    document.querySelectorAll('.btn-delete-worker').forEach(button => {
+        button.addEventListener('click', (e) => {
+            const id = parseInt(e.target.closest('button').dataset.id);
+            const name = e.target.closest('button').dataset.name;
+            deleteWorker(id, name);
+        });
+    });
+}
+
+// Global functions for HTML onclick handlers (backup)
 window.showWorkerForm = showWorkerForm;
 window.editWorker = editWorker;
 window.deleteWorker = deleteWorker;

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Frontend</title>
+</head>
+<body>
+    <h1>Debug Frontend Issues</h1>
+    
+    <button onclick="testAPI()">Test API</button>
+    <button onclick="testGlobalFunctions()">Test Global Functions</button>
+    
+    <div id="results"></div>
+    
+    <script>
+        async function testAPI() {
+            try {
+                const response = await fetch('/api/work-orders');
+                const data = await response.json();
+                document.getElementById('results').innerHTML = 
+                    `<p>API Response: ${JSON.stringify(data, null, 2)}</p>`;
+            } catch (error) {
+                document.getElementById('results').innerHTML = 
+                    `<p>API Error: ${error.message}</p>`;
+            }
+        }
+        
+        function testGlobalFunctions() {
+            const results = [];
+            
+            if (typeof window.viewWorkOrder === 'function') {
+                results.push('✅ window.viewWorkOrder exists');
+            } else {
+                results.push('❌ window.viewWorkOrder missing');
+            }
+            
+            if (typeof window.shareWorkOrder === 'function') {
+                results.push('✅ window.shareWorkOrder exists');
+            } else {
+                results.push('❌ window.shareWorkOrder missing');
+            }
+            
+            if (typeof window.deleteWorkOrder === 'function') {
+                results.push('✅ window.deleteWorkOrder exists');
+            } else {
+                results.push('❌ window.deleteWorkOrder missing');
+            }
+            
+            document.getElementById('results').innerHTML = results.join('<br>');
+        }
+    </script>
+</body>
+</html>

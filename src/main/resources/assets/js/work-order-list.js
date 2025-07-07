@@ -96,6 +96,9 @@ function displayWorkOrders() {
         const row = createWorkOrderRow(workOrder);
         tbody.appendChild(row);
     });
+    
+    // Add event listeners for action buttons
+    attachActionListeners();
 }
 
 function createWorkOrderRow(workOrder) {
@@ -133,13 +136,13 @@ function createWorkOrderRow(workOrder) {
         </td>
         <td>
             <div class="action-buttons">
-                <button class="action-btn btn-view" onclick="window.viewWorkOrder(${workOrder.id})" title="查看詳情">
+                <button class="action-btn btn-view" data-id="${workOrder.id}" title="查看詳情">
                     👁️ 查看
                 </button>
-                <button class="action-btn btn-share" onclick="window.shareWorkOrder('${workOrder.unique_link}')" title="分享連結">
+                <button class="action-btn btn-share" data-link="${workOrder.unique_link}" title="分享連結">
                     🔗 分享
                 </button>
-                <button class="action-btn btn-delete" onclick="window.deleteWorkOrder(${workOrder.id}, '${workOrder.work_order_number}')" title="刪除工單">
+                <button class="action-btn btn-delete" data-id="${workOrder.id}" data-number="${workOrder.work_order_number}" title="刪除工單">
                     🗑️ 刪除
                 </button>
             </div>
@@ -546,7 +549,35 @@ async function performDeleteWorkOrder(workOrderId) {
     }
 }
 
-// Global functions for HTML onclick handlers
+// Attach event listeners to action buttons
+function attachActionListeners() {
+    // View buttons
+    document.querySelectorAll('.btn-view').forEach(button => {
+        button.addEventListener('click', (e) => {
+            const id = parseInt(e.target.closest('button').dataset.id);
+            viewWorkOrder(id);
+        });
+    });
+    
+    // Share buttons
+    document.querySelectorAll('.btn-share').forEach(button => {
+        button.addEventListener('click', (e) => {
+            const link = e.target.closest('button').dataset.link;
+            shareWorkOrder(link);
+        });
+    });
+    
+    // Delete buttons
+    document.querySelectorAll('.btn-delete').forEach(button => {
+        button.addEventListener('click', (e) => {
+            const id = parseInt(e.target.closest('button').dataset.id);
+            const number = e.target.closest('button').dataset.number;
+            deleteWorkOrder(id, number);
+        });
+    });
+}
+
+// Global functions for HTML onclick handlers (backup)
 window.viewWorkOrder = viewWorkOrder;
 window.shareWorkOrder = shareWorkOrder;
 window.openPhotoModal = openPhotoModal;
