@@ -61,9 +61,14 @@ app.use(session({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Static files
-app.use('/static', express.static(path.join(__dirname, '../resources/assets')));
-app.use('/uploads', express.static(path.join(__dirname, '../../../output/uploads')));
+// Static files - with path logging for debugging
+const staticPath = path.join(__dirname, '../resources/assets');
+const uploadsPath = path.join(__dirname, '../../../output/uploads');
+console.log('Static files path:', staticPath);
+console.log('Uploads path:', uploadsPath);
+
+app.use('/static', express.static(staticPath));
+app.use('/uploads', express.static(uploadsPath));
 
 // Routes
 app.use('/api/work-orders', workOrderRoutes);

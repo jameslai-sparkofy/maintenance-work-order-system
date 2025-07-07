@@ -4,12 +4,27 @@ const WorkOrder = require('../models/WorkOrder');
 
 const router = express.Router();
 
-// Serve HTML views
+// Serve HTML views - fix path for Render deployment
 const viewsPath = path.join(__dirname, '../views');
+console.log('Views path:', viewsPath);
 
 // Home page - redirect to new work order form
 router.get('/', (req, res) => {
-    res.redirect('/maintenance/new');
+    res.send(`
+        <html>
+        <head><title>維修工單管理系統</title></head>
+        <body>
+            <h1>🔧 維修工單管理系統</h1>
+            <p>系統已成功部署在Render！</p>
+            <ul>
+                <li><a href="/maintenance/new">新增維修單</a></li>
+                <li><a href="/maintenance/list">工單列表</a></li>
+                <li><a href="/maintenance/workers">工務人員管理</a></li>
+            </ul>
+            <p>Views path: ${viewsPath}</p>
+        </body>
+        </html>
+    `);
 });
 
 // New work order form
