@@ -4,37 +4,329 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>工單列表 - 維修工單管理系統</title>
-    <link rel="stylesheet" href="/static/css/main.css">
-    <link rel="stylesheet" href="/static/css/list.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .navbar {
+            background: #fff;
+            border-bottom: 1px solid #e9ecef;
+            padding: 1rem 0;
+            margin-bottom: 2rem;
+        }
+        
+        .nav-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .nav-brand h1 {
+            color: #333;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        
+        .nav-link {
+            color: #666;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+        
+        .nav-link.active {
+            background: #000;
+            color: #fff;
+        }
+        
+        .nav-link:hover:not(.active) {
+            background: #f8f9fa;
+        }
+        
+        .main-content {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .page-header {
+            margin-bottom: 2rem;
+        }
+        
+        .page-header h2 {
+            color: #333;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .page-header p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .filter-card, .table-card {
+            background: #fff;
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .filter-card h3, .table-card h3 {
+            color: #333;
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .filter-group label {
+            color: #333;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            transition: border-color 0.2s;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #333;
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        
+        .btn-primary {
+            background: #000;
+            color: #fff;
+        }
+        
+        .btn-primary:hover {
+            background: #333;
+        }
+        
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+        
+        .btn-secondary:hover {
+            background: #e9ecef;
+        }
+        
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .table th, .table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .action-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-view {
+            background: #f8f9fa;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+        
+        .btn-view:hover {
+            background: #e9ecef;
+        }
+        
+        .btn-share {
+            background: #333;
+            color: #fff;
+        }
+        
+        .btn-share:hover {
+            background: #555;
+        }
+        
+        .btn-delete {
+            background: #dc3545;
+            color: #fff;
+        }
+        
+        .btn-delete:hover {
+            background: #c82333;
+        }
+        
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .status-confirmed {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .loading-state, .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+        
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: #fff;
+            padding: 2rem;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        @media (max-width: 768px) {
+            .filter-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <nav class="navbar">
-            <div class="nav-brand">
-                <h1>🔧 維修工單管理系統</h1>
-            </div>
-            <div class="nav-links">
-                <a href="/maintenance/new" class="nav-link">新增工單</a>
-                <a href="/maintenance/list" class="nav-link active">工單列表</a>
-                <a href="/maintenance/workers" class="nav-link">工務人員</a>
+            <div class="nav-content">
+                <div class="nav-brand">
+                    <h1>維修單管理系統</h1>
+                </div>
+                <div class="nav-links">
+                    <a href="/" class="nav-link">首頁</a>
+                    <a href="/maintenance/list" class="nav-link active">維修單清單</a>
+                    <a href="/maintenance/new" class="nav-link">+ 新增維修單</a>
+                    <a href="/maintenance/workers" class="nav-link">工務人員</a>
+                </div>
             </div>
         </nav>
 
         <main class="main-content">
             <div class="page-header">
-                <h2>📋 工單列表管理</h2>
+                <h2>工單列表管理</h2>
                 <p>查看、篩選和管理所有維修工單</p>
             </div>
 
             <!-- Filters Section -->
-            <div class="filters-card">
-                <div class="card-header">
-                    <h3>🔍 篩選條件</h3>
-                    <button id="resetFilters" class="btn btn-secondary btn-sm">
-                        🔄 重置篩選
-                    </button>
-                </div>
-                <div class="card-body">
+            <div class="filter-card">
+                <h3>篩選條件</h3>
                     <form id="filtersForm" class="filters-form">
                         <div class="filter-row">
                             <div class="filter-group">
@@ -70,66 +362,26 @@
                                 <input type="date" id="filterDateTo" name="dateTo" class="form-control">
                             </div>
                             
-                            <div class="filter-group filter-actions">
-                                <button type="submit" class="btn btn-primary">
-                                    🔍 套用篩選
-                                </button>
+                            <div class="filter-group">
+                                <label>&nbsp;</label>
+                                <div style="display: flex; gap: 1rem;">
+                                    <button type="submit" class="btn btn-primary">套用篩選</button>
+                                    <button type="button" id="resetFilters" class="btn btn-secondary">重置</button>
+                                </div>
                             </div>
                         </div>
                     </form>
-                </div>
-            </div>
-
-            <!-- Statistics Section -->
-            <div class="stats-section">
-                <div class="stat-card">
-                    <div class="stat-icon">📊</div>
-                    <div class="stat-content">
-                        <div class="stat-number" id="totalCount">-</div>
-                        <div class="stat-label">總工單數</div>
-                    </div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-icon">⏳</div>
-                    <div class="stat-content">
-                        <div class="stat-number" id="pendingCount">-</div>
-                        <div class="stat-label">待確認</div>
-                    </div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-icon">✅</div>
-                    <div class="stat-content">
-                        <div class="stat-number" id="confirmedCount">-</div>
-                        <div class="stat-label">已確認</div>
-                    </div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-icon">💰</div>
-                    <div class="stat-content">
-                        <div class="stat-number" id="totalAmount">-</div>
-                        <div class="stat-label">總金額</div>
-                    </div>
-                </div>
             </div>
 
             <!-- Work Orders Table -->
             <div class="table-card">
-                <div class="card-header">
-                    <h3>📋 工單清單</h3>
-                    <div class="table-actions">
-                        <button id="refreshList" class="btn btn-secondary btn-sm">
-                            🔄 重新載入
-                        </button>
-                        <button id="exportData" class="btn btn-outline btn-sm">
-                            📤 匯出資料
-                        </button>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h3>工單清單</h3>
+                    <div style="display: flex; gap: 1rem;">
+                        <button id="refreshList" class="btn btn-secondary">重新載入</button>
+                        <button id="exportData" class="btn btn-secondary">匯出資料</button>
                     </div>
                 </div>
-                
-                <div class="card-body">
                     <div id="loadingTable" class="loading-state">
                         <div class="loading-spinner"></div>
                         <p>載入工單資料中...</p>
@@ -155,14 +407,10 @@
                     </div>
                     
                     <div id="emptyState" class="empty-state" style="display: none;">
-                        <div class="empty-icon">📝</div>
                         <h3>尚無工單資料</h3>
                         <p>目前沒有符合篩選條件的工單</p>
-                        <a href="/maintenance/new" class="btn btn-primary">
-                            ➕ 建立第一個工單
-                        </a>
+                        <a href="/maintenance/new" class="btn btn-primary">建立第一個工單</a>
                     </div>
-                </div>
             </div>
 
             <!-- Work Order Detail Modal -->

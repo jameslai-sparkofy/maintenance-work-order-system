@@ -4,37 +4,381 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>工務人員管理 - 維修工單管理系統</title>
-    <link rel="stylesheet" href="/static/css/main.css">
-    <link rel="stylesheet" href="/static/css/workers.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .navbar {
+            background: #fff;
+            border-bottom: 1px solid #e9ecef;
+            padding: 1rem 0;
+            margin-bottom: 2rem;
+        }
+        
+        .nav-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .nav-brand h1 {
+            color: #333;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        
+        .nav-link {
+            color: #666;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+        
+        .nav-link.active {
+            background: #000;
+            color: #fff;
+        }
+        
+        .nav-link:hover:not(.active) {
+            background: #f8f9fa;
+        }
+        
+        .main-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .page-header {
+            margin-bottom: 2rem;
+        }
+        
+        .page-header h2 {
+            color: #333;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .page-header p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .form-card, .workers-card {
+            background: #fff;
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .form-card h3, .workers-card h3 {
+            color: #333;
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            color: #333;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            transition: border-color 0.2s;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #333;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-primary {
+            background: #000;
+            color: #fff;
+        }
+        
+        .btn-primary:hover {
+            background: #333;
+        }
+        
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+        
+        .btn-secondary:hover {
+            background: #e9ecef;
+        }
+        
+        .workers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+        
+        .worker-card {
+            background: #fff;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 1.5rem;
+            transition: all 0.2s;
+        }
+        
+        .worker-card:hover {
+            border-color: #ddd;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .worker-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+        
+        .worker-contact {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+        
+        .worker-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .worker-action-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-edit-worker {
+            background: #f8f9fa;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+        
+        .btn-edit-worker:hover {
+            background: #e9ecef;
+        }
+        
+        .btn-delete-worker {
+            background: #dc3545;
+            color: #fff;
+        }
+        
+        .btn-delete-worker:hover {
+            background: #c82333;
+        }
+        
+        .loading-state, .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+        
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: #fff;
+            padding: 2rem;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+        }
+        
+        .search-group {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-end;
+        }
+        
+        .search-group .form-control {
+            flex: 1;
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .list-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        
+        .count-badge {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.8rem;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+            color: #fff;
+        }
+        
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        
+        .warning-text {
+            color: #dc3545;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+        
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .workers-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <nav class="navbar">
-            <div class="nav-brand">
-                <h1>🔧 維修工單管理系統</h1>
-            </div>
-            <div class="nav-links">
-                <a href="/maintenance/new" class="nav-link">新增工單</a>
-                <a href="/maintenance/list" class="nav-link">工單列表</a>
-                <a href="/maintenance/workers" class="nav-link active">工務人員</a>
+            <div class="nav-content">
+                <div class="nav-brand">
+                    <h1>維修單管理系統</h1>
+                </div>
+                <div class="nav-links">
+                    <a href="/" class="nav-link">首頁</a>
+                    <a href="/maintenance/list" class="nav-link">維修單清單</a>
+                    <a href="/maintenance/new" class="nav-link">+ 新增維修單</a>
+                    <a href="/maintenance/workers" class="nav-link active">工務人員</a>
+                </div>
             </div>
         </nav>
 
         <main class="main-content">
             <div class="page-header">
-                <h2>👷 工務人員管理</h2>
+                <h2>工務人員管理</h2>
                 <p>新增、編輯和管理工務人員資料</p>
             </div>
 
             <!-- Add New Worker Section -->
-            <div class="worker-form-card">
-                <div class="card-header">
-                    <h3>➕ 新增工務人員</h3>
-                    <button id="toggleForm" class="btn btn-secondary btn-sm">
-                        📝 顯示表單
+            <div class="form-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h3>新增工務人員</h3>
+                    <button id="toggleForm" class="btn btn-secondary">
+                        顯示表單
                     </button>
                 </div>
-                <div class="card-body" id="formContainer" style="display: none;">
+                <div id="formContainer" style="display: none;">
                     <form id="workerForm" class="worker-form">
                         <div class="form-row">
                             <div class="form-group">
@@ -61,10 +405,10 @@
                         
                         <div class="form-actions">
                             <button type="button" class="btn btn-secondary" onclick="cancelWorkerForm()">
-                                ❌ 取消
+                                取消
                             </button>
                             <button type="submit" class="btn btn-primary">
-                                ✅ 新增人員
+                                新增人員
                             </button>
                         </div>
                     </form>
@@ -72,14 +416,14 @@
             </div>
 
             <!-- Search Section -->
-            <div class="search-card">
+            <div class="form-card">
                 <div class="card-body">
                     <div class="search-form">
                         <div class="search-group">
                             <input type="text" id="searchInput" class="form-control" 
-                                   placeholder="🔍 搜尋工務人員 (姓名、電話、Email)">
+                                   placeholder="搜尋工務人員 (姓名、電話、Email)">
                             <button type="button" id="clearSearch" class="btn btn-secondary">
-                                🗑️ 清除
+                                清除
                             </button>
                         </div>
                     </div>
@@ -89,11 +433,11 @@
             <!-- Workers List -->
             <div class="workers-card">
                 <div class="card-header">
-                    <h3>👥 工務人員清單</h3>
+                    <h3>工務人員清單</h3>
                     <div class="list-actions">
                         <span id="workerCount" class="count-badge">0 位人員</span>
                         <button id="refreshList" class="btn btn-secondary btn-sm">
-                            🔄 重新載入
+                            重新載入
                         </button>
                     </div>
                 </div>
@@ -111,11 +455,10 @@
                     </div>
                     
                     <div id="emptyWorkers" class="empty-state" style="display: none;">
-                        <div class="empty-icon">👷</div>
                         <h3>尚無工務人員資料</h3>
                         <p>請新增第一位工務人員</p>
                         <button class="btn btn-primary" onclick="showWorkerForm()">
-                            ➕ 新增工務人員
+                            新增工務人員
                         </button>
                     </div>
                 </div>
@@ -125,7 +468,7 @@
             <div id="editWorkerModal" class="modal">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h3>✏️ 編輯工務人員</h3>
+                        <h3>編輯工務人員</h3>
                         <button class="modal-close" onclick="UI.hideModal('editWorkerModal')">×</button>
                     </div>
                     <div class="modal-body">
@@ -159,7 +502,7 @@
                             取消
                         </button>
                         <button class="btn btn-primary" onclick="updateWorker()">
-                            ✅ 更新資料
+                            更新資料
                         </button>
                     </div>
                 </div>
@@ -169,7 +512,7 @@
             <div id="deleteWorkerModal" class="modal">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h3>⚠️ 確認刪除</h3>
+                        <h3>確認刪除</h3>
                         <button class="modal-close" onclick="UI.hideModal('deleteWorkerModal')">×</button>
                     </div>
                     <div class="modal-body">
@@ -182,7 +525,7 @@
                             取消
                         </button>
                         <button class="btn btn-danger" onclick="window.confirmDeleteWorker()">
-                            🗑️ 確認刪除
+                            確認刪除
                         </button>
                     </div>
                 </div>
