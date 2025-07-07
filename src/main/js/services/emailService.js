@@ -8,7 +8,7 @@ class EmailService {
 
     init() {
         // Configure email transporter
-        this.transporter = nodemailer.createTransporter({
+        this.transporter = nodemailer.createTransport({
             // For development - use ethereal email (fake SMTP)
             host: process.env.SMTP_HOST || 'smtp.ethereal.email',
             port: process.env.SMTP_PORT || 587,
@@ -21,7 +21,7 @@ class EmailService {
 
         // For production, use real SMTP settings:
         /*
-        this.transporter = nodemailer.createTransporter({
+        this.transporter = nodemailer.createTransport({
             host: process.env.SMTP_HOST,
             port: process.env.SMTP_PORT || 587,
             secure: process.env.SMTP_SECURE === 'true',

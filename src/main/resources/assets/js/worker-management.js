@@ -166,10 +166,10 @@ function createWorkerCard(worker) {
         </div>
         
         <div class="worker-actions">
-            <button class="worker-action-btn btn-edit-worker" onclick="editWorker(${worker.id})">
+            <button class="worker-action-btn btn-edit-worker" onclick="window.editWorker(${worker.id})">
                 ✏️ 編輯
             </button>
-            <button class="worker-action-btn btn-delete-worker" onclick="deleteWorker(${worker.id}, '${worker.name}')">
+            <button class="worker-action-btn btn-delete-worker" onclick="window.deleteWorker(${worker.id}, '${worker.name.replace(/'/g, "\\'")}')">
                 🗑️ 刪除
             </button>
         </div>

@@ -133,10 +133,10 @@ function createWorkOrderRow(workOrder) {
         </td>
         <td>
             <div class="action-buttons">
-                <button class="action-btn btn-view" onclick="viewWorkOrder(${workOrder.id})" title="查看詳情">
+                <button class="action-btn btn-view" onclick="window.viewWorkOrder(${workOrder.id})" title="查看詳情">
                     👁️ 查看
                 </button>
-                <button class="action-btn btn-share" onclick="shareWorkOrder('${workOrder.unique_link}')" title="分享連結">
+                <button class="action-btn btn-share" onclick="window.shareWorkOrder('${workOrder.unique_link}')" title="分享連結">
                     🔗 分享
                 </button>
             </div>
@@ -321,7 +321,7 @@ function generateWorkOrderHTML(workOrder) {
                 <img src="/uploads/${photo.photo_path}" 
                      alt="${photo.original_name || 'Photo'}"
                      class="photo-thumbnail"
-                     onclick="openPhotoModal('/uploads/${photo.photo_path}', '${photo.original_name || 'Photo'}')">
+                     onclick="window.openPhotoModal('/uploads/${photo.photo_path}', '${photo.original_name || 'Photo'}')">
             `;
         });
         
@@ -357,7 +357,7 @@ function generateWorkOrderHTML(workOrder) {
                     <code style="flex: 1; padding: 0.5rem; background: #f8f9fa; border-radius: 4px; font-size: 0.875rem;">
                         ${window.location.origin}/work-order/${workOrder.unique_link}
                     </code>
-                    <button class="btn btn-primary btn-sm" onclick="shareWorkOrder('${workOrder.unique_link}')">
+                    <button class="btn btn-primary btn-sm" onclick="window.shareWorkOrder('${workOrder.unique_link}')">
                         🔗 複製連結
                     </button>
                 </div>
