@@ -35,7 +35,10 @@ class WP_PDF_Signature_Public {
      */
     public function enqueue_public_scripts() {
         if (get_query_var('pdf_signature_id')) {
-            wp_enqueue_script('wp-pdf-signature-public', WP_PDF_SIGNATURE_PLUGIN_URL . 'assets/js/public.js', array('jquery'), WP_PDF_SIGNATURE_VERSION, true);
+            // 載入兼容性修復腳本（早期版本已經載入，這是額外的修復）
+            wp_enqueue_script('wp-pdf-signature-compatibility', WP_PDF_SIGNATURE_PLUGIN_URL . 'assets/js/compatibility.js', array('jquery', 'wp-pdf-signature-early-compatibility'), WP_PDF_SIGNATURE_VERSION, false);
+            
+            wp_enqueue_script('wp-pdf-signature-public', WP_PDF_SIGNATURE_PLUGIN_URL . 'assets/js/public.js', array('jquery', 'wp-pdf-signature-early-compatibility', 'wp-pdf-signature-compatibility'), WP_PDF_SIGNATURE_VERSION, true);
             wp_enqueue_style('wp-pdf-signature-public', WP_PDF_SIGNATURE_PLUGIN_URL . 'assets/css/public.css', array(), WP_PDF_SIGNATURE_VERSION);
             
             // PDF相關庫

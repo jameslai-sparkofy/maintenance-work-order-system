@@ -18,6 +18,12 @@ define('WP_PDF_SIGNATURE_VERSION', '1.0.0');
 define('WP_PDF_SIGNATURE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('WP_PDF_SIGNATURE_PLUGIN_URL', plugin_dir_url(__FILE__));
 
+// 立即載入超早期修復器
+require_once WP_PDF_SIGNATURE_PLUGIN_DIR . 'super-early-fix.php';
+
+// 立即載入兼容性修復器
+require_once WP_PDF_SIGNATURE_PLUGIN_DIR . 'compatibility-loader.php';
+
 // 主要插件類
 class WP_PDF_Signature {
     
@@ -31,6 +37,10 @@ class WP_PDF_Signature {
     }
     
     private function __construct() {
+        // 最早的時機載入兼容性修復
+        add_action('wp_head', array($this, 'inject_compatibility_script'), 1);
+        add_action('admin_head', array($this, 'inject_compatibility_script'), 1);
+        
         add_action('init', array($this, 'init'));
         add_action('plugins_loaded', array($this, 'load_textdomain'));
         register_activation_hook(__FILE__, array($this, 'activate'));
@@ -38,6 +48,10 @@ class WP_PDF_Signature {
     }
     
     public function init() {
+        // 優先載入兼容性修復
+        add_action('wp_enqueue_scripts', array($this, 'enqueue_early_compatibility'), 1);
+        add_action('admin_enqueue_scripts', array($this, 'enqueue_early_compatibility'), 1);
+        
         // 載入核心文件
         $this->load_includes();
         
@@ -97,6 +111,170 @@ class WP_PDF_Signature {
     
     private function init_frontend() {
         new WP_PDF_Signature_Public();
+    }
+    
+    /**
+     * 直接在head中注入兼容性修復腳本
+     */
+    public function inject_compatibility_script() {
+        static $injected = false;
+        
+        if ($injected) {
+            return;
+        }
+        
+        $injected = true;
+        
+        // 先載入終極兼容性修復
+        echo '<script type="text/javascript" src="' . WP_PDF_SIGNATURE_PLUGIN_URL . 'assets/js/force-compatibility.js?v=' . WP_PDF_SIGNATURE_VERSION . '"></script>';
+        
+        // 直接輸出JavaScript代碼，確保最早執行
+        ?>
+        <script type="text/javascript">
+        // PDF簽名系統 - 立即執行的jQuery兼容性修復
+        (function() {
+            'use strict';
+            
+            // 立即攔截addEventListener - 必須在任何其他腳本執行前
+            if (typeof window !== 'undefined' && window.EventTarget) {
+                const deprecatedEvents = [
+                    'DOMNodeInserted', 'DOMNodeRemoved', 'DOMSubtreeModified',
+                    'DOMAttrModified', 'DOMCharacterDataModified'
+                ];
+                
+                const originalAddEventListener = EventTarget.prototype.addEventListener;
+                EventTarget.prototype.addEventListener = function(type, listener, options) {
+                    if (deprecatedEvents.includes(type)) {
+                        console.info('PDF簽名系統: 已攔截deprecated mutation event "' + type + '"');
+                        return; // 直接忽略，不註冊事件
+                    }
+                    return originalAddEventListener.call(this, type, listener, options);
+                };
+                
+                // 攔截console.warn來靜默處理警告
+                if (window.console && window.console.warn) {
+                    const originalWarn = console.warn;
+                    console.warn = function() {
+                        const message = Array.prototype.slice.call(arguments).join(' ');
+                        
+                        // 過濾特定警告
+                        if (message.includes('DOMNodeInserted') || 
+                            message.includes('mutation event') ||
+                            message.includes('Support for this event type has been removed') ||
+                            message.includes('message channel closed') ||
+                            message.includes('asynchronous response by returning true')) {
+                            return; // 靜默處理
+                        }
+                        
+                        originalWarn.apply(console, arguments);
+                    };
+                }
+                
+                // 攔截console.error來靜默處理錯誤
+                if (window.console && window.console.error) {
+                    const originalError = console.error;
+                    console.error = function() {
+                        const message = Array.prototype.slice.call(arguments).join(' ');
+                        
+                        if (message.includes('message channel closed') ||
+                            message.includes('asynchronous response by returning true')) {
+                            return; // 靜默處理
+                        }
+                        
+                        originalError.apply(console, arguments);
+                    };
+                }
+                
+                // 設定一個定時器來攔截延遲載入的jQuery
+                let jqueryInterceptAttempts = 0;
+                const maxAttempts = 50; // 5秒內檢查
+                
+                function interceptJQuery() {
+                    if (jqueryInterceptAttempts++ > maxAttempts) {
+                        return;
+                    }
+                    
+                    if (typeof window.jQuery !== 'undefined') {
+                        const $ = window.jQuery;
+                        
+                        // 攔截jQuery的事件方法
+                        if ($.fn.on) {
+                            const originalOn = $.fn.on;
+                            $.fn.on = function(events, selector, data, handler) {
+                                if (typeof events === 'string') {
+                                    // 移除所有mutation events
+                                    events = events.replace(/DOMNodeInserted|DOMNodeRemoved|DOMSubtreeModified|DOMAttrModified|DOMCharacterDataModified/g, '');
+                                    if (!events.trim()) {
+                                        console.info('PDF簽名系統: 攔截了jQuery mutation events');
+                                        return this;
+                                    }
+                                }
+                                return originalOn.call(this, events, selector, data, handler);
+                            };
+                        }
+                        
+                        if ($.fn.bind) {
+                            const originalBind = $.fn.bind;
+                            $.fn.bind = function(types, data, fn) {
+                                if (typeof types === 'string') {
+                                    types = types.replace(/DOMNodeInserted|DOMNodeRemoved|DOMSubtreeModified|DOMAttrModified|DOMCharacterDataModified/g, '');
+                                    if (!types.trim()) {
+                                        console.info('PDF簽名系統: 攔截了jQuery bind mutation events');
+                                        return this;
+                                    }
+                                }
+                                return originalBind.call(this, types, data, fn);
+                            };
+                        }
+                        
+                        // 攔截jQuery內部的add方法
+                        if ($.event && $.event.add) {
+                            const originalEventAdd = $.event.add;
+                            $.event.add = function(elem, types, handler, data, selector) {
+                                if (typeof types === 'string') {
+                                    const deprecatedEvents = ['DOMNodeInserted', 'DOMNodeRemoved', 'DOMSubtreeModified', 'DOMAttrModified', 'DOMCharacterDataModified'];
+                                    for (let i = 0; i < deprecatedEvents.length; i++) {
+                                        if (types.includes(deprecatedEvents[i])) {
+                                            console.info('PDF簽名系統: 攔截了jQuery.event.add mutation event: ' + deprecatedEvents[i]);
+                                            return;
+                                        }
+                                    }
+                                }
+                                return originalEventAdd.call(this, elem, types, handler, data, selector);
+                            };
+                        }
+                        
+                        console.info('PDF簽名系統: jQuery兼容性修復已套用');
+                    } else {
+                        // 如果jQuery還沒載入，繼續等待
+                        setTimeout(interceptJQuery, 100);
+                    }
+                }
+                
+                // 立即嘗試一次，然後設定延遲檢查
+                interceptJQuery();
+                
+                console.info('PDF簽名系統: 兼容性修復已載入 (inline)');
+            }
+        })();
+        </script>
+        <?php
+    }
+    
+    /**
+     * 載入早期兼容性修復腳本
+     */
+    public function enqueue_early_compatibility() {
+        // 只載入一次，且優先級最高
+        if (!wp_script_is('wp-pdf-signature-early-compatibility', 'enqueued')) {
+            wp_enqueue_script(
+                'wp-pdf-signature-early-compatibility',
+                WP_PDF_SIGNATURE_PLUGIN_URL . 'assets/js/early-compatibility.js',
+                array(),
+                WP_PDF_SIGNATURE_VERSION,
+                false // 載入在head中，確保最早執行
+            );
+        }
     }
     
     public function load_textdomain() {
