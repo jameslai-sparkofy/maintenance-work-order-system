@@ -89,22 +89,74 @@
         }
     }
     
-    // 全域錯誤處理 - 捕獲並抑制mutation event警告
-    if (typeof window !== 'undefined' && window.console) {
-        const originalWarn = console.warn;
-        console.warn = function() {
-            const message = Array.prototype.slice.call(arguments).join(' ');
-            
-            // 過濾掉已知的jQuery mutation event警告
-            if (message.includes('DOMNodeInserted') || 
-                message.includes('mutation event') ||
-                message.includes('Support for this event type has been removed')) {
-                return; // 靜默處理這些警告
+    // 強制修復 - 在全域範圍內攔截和修復mutation events
+    if (typeof window !== 'undefined') {
+        // 攔截addEventListener調用
+        const originalAddEventListener = Element.prototype.addEventListener;
+        Element.prototype.addEventListener = function(type, listener, options) {
+            // 阻止添加deprecated mutation events
+            if (type === 'DOMNodeInserted' || 
+                type === 'DOMNodeRemoved' || 
+                type === 'DOMSubtreeModified' ||
+                type === 'DOMAttrModified' ||
+                type === 'DOMCharacterDataModified') {
+                
+                console.warn('PDF簽名系統: 阻止了deprecated mutation event: ' + type);
+                return; // 不執行原始的addEventListener
             }
             
-            // 其他警告正常顯示
-            originalWarn.apply(console, arguments);
+            return originalAddEventListener.call(this, type, listener, options);
         };
+        
+        // 攔截Document的addEventListener
+        const originalDocAddEventListener = Document.prototype.addEventListener;
+        Document.prototype.addEventListener = function(type, listener, options) {
+            if (type === 'DOMNodeInserted' || 
+                type === 'DOMNodeRemoved' || 
+                type === 'DOMSubtreeModified' ||
+                type === 'DOMAttrModified' ||
+                type === 'DOMCharacterDataModified') {
+                
+                console.warn('PDF簽名系統: 阻止了document level mutation event: ' + type);
+                return;
+            }
+            
+            return originalDocAddEventListener.call(this, type, listener, options);
+        };
+        
+        // 全域錯誤處理 - 捕獲並抑制mutation event警告
+        if (window.console) {
+            const originalWarn = console.warn;
+            const originalError = console.error;
+            
+            console.warn = function() {
+                const message = Array.prototype.slice.call(arguments).join(' ');
+                
+                // 過濾掉已知的jQuery mutation event警告
+                if (message.includes('DOMNodeInserted') || 
+                    message.includes('mutation event') ||
+                    message.includes('Support for this event type has been removed') ||
+                    message.includes('Listener added for a') ||
+                    message.includes('message channel closed')) {
+                    return; // 靜默處理這些警告
+                }
+                
+                // 其他警告正常顯示
+                originalWarn.apply(console, arguments);
+            };
+            
+            console.error = function() {
+                const message = Array.prototype.slice.call(arguments).join(' ');
+                
+                // 過濾掉異步響應錯誤
+                if (message.includes('message channel closed') ||
+                    message.includes('asynchronous response by returning true')) {
+                    return; // 靜默處理這些錯誤
+                }
+                
+                originalError.apply(console, arguments);
+            };
+        }
     }
     
     // 為舊瀏覽器提供MutationObserver polyfill的簡化版本
