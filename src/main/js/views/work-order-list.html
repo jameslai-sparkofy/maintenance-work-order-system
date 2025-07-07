@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工單列表 - 維修工單管理系統</title>
+    <link rel="stylesheet" href="/static/css/main.css">
+    <link rel="stylesheet" href="/static/css/list.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="navbar">
+            <div class="nav-brand">
+                <h1>🔧 維修工單管理系統</h1>
+            </div>
+            <div class="nav-links">
+                <a href="/maintenance/new" class="nav-link">新增工單</a>
+                <a href="/maintenance/list" class="nav-link active">工單列表</a>
+                <a href="/maintenance/workers" class="nav-link">工務人員</a>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <div class="page-header">
+                <h2>📋 工單列表管理</h2>
+                <p>查看、篩選和管理所有維修工單</p>
+            </div>
+
+            <!-- Filters Section -->
+            <div class="filters-card">
+                <div class="card-header">
+                    <h3>🔍 篩選條件</h3>
+                    <button id="resetFilters" class="btn btn-secondary btn-sm">
+                        🔄 重置篩選
+                    </button>
+                </div>
+                <div class="card-body">
+                    <form id="filtersForm" class="filters-form">
+                        <div class="filter-row">
+                            <div class="filter-group">
+                                <label for="filterSite">案場</label>
+                                <input type="text" id="filterSite" name="siteName" 
+                                       class="form-control" placeholder="輸入案場名稱">
+                            </div>
+                            
+                            <div class="filter-group">
+                                <label for="filterBuilding">棟別</label>
+                                <input type="text" id="filterBuilding" name="building" 
+                                       class="form-control" placeholder="輸入棟別">
+                            </div>
+                            
+                            <div class="filter-group">
+                                <label for="filterStatus">狀態</label>
+                                <select id="filterStatus" name="status" class="form-control">
+                                    <option value="">全部狀態</option>
+                                    <option value="pending">待確認</option>
+                                    <option value="confirmed">已確認</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="filter-row">
+                            <div class="filter-group">
+                                <label for="filterDateFrom">起始日期</label>
+                                <input type="date" id="filterDateFrom" name="dateFrom" class="form-control">
+                            </div>
+                            
+                            <div class="filter-group">
+                                <label for="filterDateTo">結束日期</label>
+                                <input type="date" id="filterDateTo" name="dateTo" class="form-control">
+                            </div>
+                            
+                            <div class="filter-group filter-actions">
+                                <button type="submit" class="btn btn-primary">
+                                    🔍 套用篩選
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Statistics Section -->
+            <div class="stats-section">
+                <div class="stat-card">
+                    <div class="stat-icon">📊</div>
+                    <div class="stat-content">
+                        <div class="stat-number" id="totalCount">-</div>
+                        <div class="stat-label">總工單數</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">⏳</div>
+                    <div class="stat-content">
+                        <div class="stat-number" id="pendingCount">-</div>
+                        <div class="stat-label">待確認</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-content">
+                        <div class="stat-number" id="confirmedCount">-</div>
+                        <div class="stat-label">已確認</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">💰</div>
+                    <div class="stat-content">
+                        <div class="stat-number" id="totalAmount">-</div>
+                        <div class="stat-label">總金額</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Work Orders Table -->
+            <div class="table-card">
+                <div class="card-header">
+                    <h3>📋 工單清單</h3>
+                    <div class="table-actions">
+                        <button id="refreshList" class="btn btn-secondary btn-sm">
+                            🔄 重新載入
+                        </button>
+                        <button id="exportData" class="btn btn-outline btn-sm">
+                            📤 匯出資料
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    <div id="loadingTable" class="loading-state">
+                        <div class="loading-spinner"></div>
+                        <p>載入工單資料中...</p>
+                    </div>
+                    
+                    <div id="tableContainer" class="table-container" style="display: none;">
+                        <table class="table" id="workOrdersTable">
+                            <thead>
+                                <tr>
+                                    <th>工單號</th>
+                                    <th>日期</th>
+                                    <th>案場</th>
+                                    <th>位置</th>
+                                    <th>工務人員</th>
+                                    <th>金額</th>
+                                    <th>狀態</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="workOrdersBody">
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div id="emptyState" class="empty-state" style="display: none;">
+                        <div class="empty-icon">📝</div>
+                        <h3>尚無工單資料</h3>
+                        <p>目前沒有符合篩選條件的工單</p>
+                        <a href="/maintenance/new" class="btn btn-primary">
+                            ➕ 建立第一個工單
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Work Order Detail Modal -->
+            <div id="detailModal" class="modal">
+                <div class="modal-content modal-lg">
+                    <div class="modal-header">
+                        <h3 id="modalTitle">工單詳細資料</h3>
+                        <button class="modal-close" onclick="UI.hideModal('detailModal')">×</button>
+                    </div>
+                    <div class="modal-body" id="modalBody">
+                        <!-- Content will be populated dynamically -->
+                    </div>
+                    <div class="modal-actions">
+                        <button class="btn btn-secondary" onclick="UI.hideModal('detailModal')">
+                            關閉
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/static/js/utils.js"></script>
+    <script src="/static/js/work-order-list.js"></script>
+</body>
+</html>

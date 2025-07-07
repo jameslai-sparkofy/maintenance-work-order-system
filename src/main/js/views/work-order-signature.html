@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>維修單確認 - 維修工單管理系統</title>
+    <link rel="stylesheet" href="/static/css/main.css">
+    <link rel="stylesheet" href="/static/css/signature.css">
+</head>
+<body>
+    <div class="container">
+        <header class="signature-header">
+            <h1>🔧 維修單確認</h1>
+            <p>請檢查維修單內容並進行數位簽名確認</p>
+        </header>
+
+        <main class="main-content">
+            <div id="loadingState" class="loading-state">
+                <div class="loading-spinner"></div>
+                <p>載入維修單資料中...</p>
+            </div>
+
+            <div id="workOrderContent" class="work-order-content" style="display: none;">
+                <!-- Work Order Details -->
+                <div class="work-order-card">
+                    <div class="card-header">
+                        <h2>📋 維修單詳細資料</h2>
+                        <div class="work-order-number" id="workOrderNumber"></div>
+                    </div>
+                    
+                    <div class="card-body">
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <label>日期</label>
+                                <span id="workOrderDate"></span>
+                            </div>
+                            
+                            <div class="info-item" id="siteContainer" style="display: none;">
+                                <label>案場</label>
+                                <span id="siteName"></span>
+                            </div>
+                            
+                            <div class="info-item" id="locationContainer" style="display: none;">
+                                <label>位置</label>
+                                <span id="location"></span>
+                            </div>
+                            
+                            <div class="info-item" id="reasonContainer" style="display: none;">
+                                <label>維修原因</label>
+                                <span id="reason"></span>
+                            </div>
+                            
+                            <div class="info-item" id="workerContainer" style="display: none;">
+                                <label>工務人員</label>
+                                <span id="workerName"></span>
+                            </div>
+                            
+                            <div class="info-item" id="amountContainer" style="display: none;">
+                                <label>金額</label>
+                                <span id="amount"></span>
+                            </div>
+                        </div>
+                        
+                        <!-- Photos Section -->
+                        <div id="photosSection" class="photos-section" style="display: none;">
+                            <h3>📷 相關照片</h3>
+                            <div id="photosGrid" class="photos-grid"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Signature Section -->
+                <div class="signature-card">
+                    <div class="card-header">
+                        <h2>✍️ 數位簽名確認</h2>
+                        <p>請在下方簽名欄位進行簽名，完成後點擊確認</p>
+                    </div>
+                    
+                    <div class="card-body">
+                        <form id="signatureForm" class="signature-form">
+                            <div class="form-group">
+                                <label for="signerName">簽名人姓名 <span class="required">*</span></label>
+                                <input type="text" id="signerName" name="signerName" 
+                                       class="form-control" required 
+                                       placeholder="請輸入您的姓名">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="signerEmail">電子郵件 (選填)</label>
+                                <input type="email" id="signerEmail" name="signerEmail" 
+                                       class="form-control" 
+                                       placeholder="填寫後將收到確認通知信">
+                                <small class="form-text">填寫電子郵件後，系統將自動發送確認通知</small>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>數位簽名 <span class="required">*</span></label>
+                                <div class="signature-pad-container">
+                                    <canvas id="signaturePad" class="signature-pad"></canvas>
+                                    <div class="signature-controls">
+                                        <button type="button" id="clearSignature" class="btn btn-secondary">
+                                            🗑️ 清除簽名
+                                        </button>
+                                        <div class="signature-info">
+                                            <small>請在上方區域進行簽名</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    ✅ 確認簽名並送出
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error State -->
+            <div id="errorState" class="error-state" style="display: none;">
+                <div class="error-icon">❌</div>
+                <h2>維修單不存在</h2>
+                <p>您要查看的維修單不存在或連結已失效</p>
+                <button class="btn btn-primary" onclick="window.close()">關閉視窗</button>
+            </div>
+
+            <!-- Success Modal -->
+            <div id="successModal" class="modal">
+                <div class="modal-content">
+                    <div class="success-icon">✅</div>
+                    <h3>簽名確認完成！</h3>
+                    <p>維修單已完成確認，感謝您的配合</p>
+                    <div id="emailNotification" style="display: none;">
+                        <p class="email-sent">📧 確認通知已發送至您的電子郵件</p>
+                    </div>
+                    <div class="modal-actions">
+                        <button class="btn btn-primary" onclick="window.close()">
+                            關閉視窗
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/static/js/utils.js"></script>
+    <script src="/static/js/signature-pad.min.js"></script>
+    <script src="/static/js/work-order-signature.js"></script>
+</body>
+</html>
